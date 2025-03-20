@@ -1,180 +1,161 @@
-from http.client import responses
-
-import streamlit as st
 import random
-from enum import Enum
 
-from streamlit import columns
-
-# Dictionnaire des mots français-catalans
-mots = {
-    "Bonjour": "Hola",
-    "Merci": "Gràcies",
-    "Bonjour tout le monde": "Hola a tothom",
-    "Merci beaucoup": "Moltes gràcies"
+# Dictionnaire des mots français et leur traduction en catalan
+dictionnaire_verbes_francais_catalan = {
+    'être': 'ser/ésser',
+    'avoir': 'haver',
+    'tenir': 'tenir',
+    'venir': 'venir',
+    'aller': 'anar',
+    'donner': 'donar',
+    'voir': 'veure',
+    'savoir': 'saber',
+    'devoir': 'deure',
+    'pouvoir': 'poder',
+    'vouloir': 'voler',
+    'croire': 'creure',
+    'faire': 'fer',
+    'dire': 'dir',
+    'sortir': 'sortir',
+    'vivre': 'viure',
+    'mériter': 'meréixer',
+    'boire': 'beure',
+    'fuir': 'fugir',
+    'cuisiner': 'coure',
+    'tenir (s’adapter)': 'cabre',
+    'maintenir': 'mantenir',
+    'courir': 'Córrer',
+    'comprendre': 'entendre',
+    'vendre': 'vendre',
+    'écrire': 'escriure',
+    'bouger': 'moure',
+    'mourir': 'morrer',
+    'connaître': 'conèixer',
+    'naître': 'néixer',
+    'émouvoir': 'commoure',
+    'ouvrir': 'obrir',
+    's’asseoir': 'seure',
+    'faire mal': 'doldre',
+    'tomber': 'caure',
+    'obtenir': 'obtenir',
+    'porter': 'dur',
+    'conclure': 'concloure',
+    'respecter': 'complir',
+    'offrir': 'oferir',
+    'attendre': 'atendre',
+    'fondre': 'fondre',
+    'rire': 'riure',
+    'sourire': 'somriure',
+    'mentir / se reposer': 'jeure',
+    'récolter': 'collir',
+    'briller': 'lluïr',
+    'plaire': 'complaure',
+    'valoir': 'valer',
+    'sortir': 'eixir',
+    'promettre': 'prometre',
+    'vaincre': 'vèncer',
+    'chanter': 'cantar',
+    'aimer': 'estimar',
+    'écouter': 'escoltar',
+    'porter': 'portar',
+    'chercher': 'buscar',
+    'toucher': 'tocar',
+    'arriver': 'arribar',
+    'attendre / espérer': 'esperar',
+    'acheter': 'comprar',
+    'payer': 'pagar',
+    'regarder': 'mirar',
+    'attraper': 'agafar',
+    'crier': 'cridar',
+    'étudier': 'estudiar',
+    'travailler': 'treballar',
+    'demander': 'preguntar',
+    'voyager': 'viatjar',
+    'terminer': 'acabar',
+    'aider': 'ajudar',
+    'parler': 'parlar',
+    'oublier': 'oblidar',
+    'gagner': 'guanyar',
+    'utiliser': 'utilitzar',
+    'marcher': 'caminar',
+    'avoir besoin de': 'necessitar',
+    'essayer': 'intentar',
+    'entrer': 'entrar',
+    'enseigner': 'ensenyar',
+    'rendre': 'tornar',
+    'manger': 'menjar',
+    'partir': 'marxar',
+    'débatte': 'debatre',
+    'appartenir': 'pertànyer',
+    'perdre': 'perdre',
+    'rendre (quelque chose)': 'retre',
+    'presser': 'prémer',
+    'craindre': 'témer',
+    'abattre': 'abatre',
+    'casser': 'rompre',
+    'décider': 'decidir',
+    'choisir': 'escollir',
+    'dormir': 'dormir',
+    'traduire': 'traduir',
+    'discuter': 'discutir',
+    'lire': 'llegir',
+    'partager': 'compartir',
+    'produire': 'produir',
 }
 
-class Step(Enum):
-    INITIAL = 1
-    PLACEHOLDER_SELECTION = 2
-    PROCESSING = 3
 
-    @classmethod
-    def next_value(cls, current_value):
-        next_value = (current_value.value % len(cls)) + 1
-        return Step(next_value)
+def poser_questions(dico):
+    mots_posés = list(dico.keys())
+    random.shuffle(mots_posés)  # Mélange les mots de manière aléatoire
+    score = 0
+    mauvaises_reponses = []
 
+    for mot_francais in mots_posés:
+        traduction_attendue = dico[mot_francais]
+        reponse = input(f"Traduisez '{mot_francais}' en catalan: ").strip()
 
-if "step" not in st.session_state:
-    st.session_state.step = Step.INITIAL
-
-colsPrincipal = st.columns([1])
-cols = st.columns([1, 1])
-
-def handle_placeholder_click(message=None, reponses_possibles=mots):
-    # Mélange des questions
-    mots_possibles = list(mots.items())
-    random.shuffle(mots_possibles)
-
-    # Initialisation des variables
-    index = 0
-    bonnes_reponses = 0
-    fautes = []
-
-    # Titre du test
-    with colsPrincipal[0]:
-        st.markdown("<h1 style='text-align: center; color: white;'>Catalan</h1>", unsafe_allow_html=True)
-
-        # Affichage de la question et des boutons de réponses
-        st.subheader(f"'toto' en catalan ?")
-
-        if st.session_state.step == Step.PROCESSING:
-            st.session_state.step = Step.INITIAL
+        if reponse.lower() == traduction_attendue.lower():
+            # Afficher la bonne réponse en vert
+            print(f"\033[32mBonne réponse: {traduction_attendue}\033[0m")  # Code ANSI pour vert
+            score += 1
         else:
-            st.session_state.step = Step.next_value(st.session_state.step)
+            # Afficher la mauvaise réponse en rouge
+            print(f"\033[31mMauvaise réponse: {traduction_attendue}\033[0m")  # Code ANSI pour rouge
+            mauvaises_reponses.append((mot_francais, traduction_attendue))
 
-        if st.session_state.step.value == Step.INITIAL.value:
-            st.button(
-                "Démarrer le test",
-                on_click=handle_placeholder_click,
-                args=("",),
-            )
-        elif st.session_state.step.value == Step.PLACEHOLDER_SELECTION.value:
-            with cols[0]:
-                st.button(
-                    reponses_possibles[0], use_container_width=True, on_click=handle_placeholder_click, args=(reponses_possibles[0],)
-                )
-            with cols[0]:
-                st.button(
-                    reponses_possibles[1], use_container_width=True, on_click=handle_placeholder_click, args=(reponses_possibles[1],)
-                )
-            with cols[1]:
-                st.button(
-                    reponses_possibles[2], use_container_width=True, on_click=handle_placeholder_click, args=(reponses_possibles[2],)
-                )
-            with cols[1]:
-                st.button(
-                    reponses_possibles[3], use_container_width=True, on_click=handle_placeholder_click, args=(reponses_possibles[3],)
-                )
+    print(f"\nVotre score final est: {score}/{len(dico)}")
+    if mauvaises_reponses:
+        print("\nMauvaises réponses:")
+        for mot, traduction in mauvaises_reponses:
+            print(f"'{mot}' -> '{traduction}'")
+
+    return mauvaises_reponses
+
+
+def recommencer_sur_mauvaises_reponses(mauvaises_reponses, dico):
+    dico_mauvaises_reponses = {mot: dico[mot] for mot, _ in mauvaises_reponses}
+    if dico_mauvaises_reponses:
+        print("\nRecommençons avec les mots que vous n'avez pas trouvés :")
+        return poser_questions(dico_mauvaises_reponses)
+    else:
+        print("\nVous avez répondu correctement à toutes les questions !")
+        return []
+
+
+def main():
+    print("Bienvenue dans le quiz de traduction !")
+    mauvaises_reponses = poser_questions(dictionnaire_verbes_francais_catalan)
+
+    if mauvaises_reponses:
+        recommencer = input(
+            "\nVoulez-vous recommencer avec les mots que vous n'avez pas trouvés ? (oui/non): ").strip().lower()
+        if recommencer == 'oui':
+            recommencer_sur_mauvaises_reponses(mauvaises_reponses, dictionnaire_verbes_francais_catalan)
         else:
-            st.write("The message has been sent and is being processed.")
-            st.button("RESET", on_click=handle_placeholder_click, args=("RESET BUTTON",))
-
-# Fonction pour gérer le test
-def passer_test():
-    # Mélange des questions
-    mots_possibles = list(mots.items())
-    random.shuffle(mots_possibles)
-
-    # Initialisation des variables
-    index = 0
-    bonnes_reponses = 0
-    fautes = []
-
-    # Titre du test
-    st.title("Catalan")
-
-    # Variable pour suivre la question actuelle
-    if 'index' not in st.session_state:
-        st.session_state.index = 0
-    if 'bonnes_reponses' not in st.session_state:
-        st.session_state.bonnes_reponses = 0
-    if 'fautes' not in st.session_state:
-        st.session_state.fautes = []
-
-    # Affichage de la question actuelle
-    fr, ca = mots_possibles[st.session_state.index]
-
-    # Liste des options possibles : on génère 3 fausses réponses et une correcte
-    reponses_possibles = [ca]
-    while len(reponses_possibles) < 4 :
-        fausse_reponse = random.choice(list(mots.values()))
-        if fausse_reponse != ca and fausse_reponse not in reponses_possibles:
-            reponses_possibles.append(fausse_reponse)
-
-    # Mélange des réponses pour que la bonne réponse ne soit pas toujours au même endroit
-    random.shuffle(reponses_possibles)
-
-    # Affichage de la question et des boutons de réponses
-    st.subheader(f"'{fr}' en catalan ?")
-
-    left, right = st.columns(2)
-    # Variables pour vérifier la réponse
-    reponse_correcte = False
-    if left.button(reponses_possibles[0], use_container_width=True):
-        if reponses_possibles[0].strip() == ca:
-            reponse_correcte = True
-            st.session_state.bonnes_reponses += 1
-            st.success(f"Juste ! La traduction correcte de '{fr}' est '{ca}'.")
-        else:
-            reponse_correcte = False
-            st.error(f"Faux ! La traduction correcte de '{fr}' est '{ca}', mais vous avez répondu '{reponses_possibles[0]}'.")
-            st.session_state.fautes.append((fr, ca, reponses_possibles[0]))
-    if right.button(reponses_possibles[1], use_container_width=True):
-        if reponses_possibles[1].strip() == ca:
-            reponse_correcte = True
-            st.session_state.bonnes_reponses += 1
-            st.success(f"Juste ! La traduction correcte de '{fr}' est '{ca}'.")
-        else:
-            reponse_correcte = False
-            st.error(f"Faux ! La traduction correcte de '{fr}' est '{ca}', mais vous avez répondu '{reponses_possibles[1]}'.")
-            st.session_state.fautes.append((fr, ca, reponses_possibles[1]))
-    if left.button(reponses_possibles[2], use_container_width=True):
-        if reponses_possibles[2].strip() == ca:
-            reponse_correcte = True
-            st.session_state.bonnes_reponses += 1
-            st.success(f"Juste ! La traduction correcte de '{fr}' est '{ca}'.")
-        else:
-            reponse_correcte = False
-            st.error(f"Faux ! La traduction correcte de '{fr}' est '{ca}', mais vous avez répondu '{reponses_possibles[2]}'.")
-            st.session_state.fautes.append((fr, ca, reponses_possibles[2]))
-    if right.button(reponses_possibles[3], use_container_width=True):
-        if reponses_possibles[3].strip() == ca:
-            reponse_correcte = True
-            st.session_state.bonnes_reponses += 1
-            st.success(f"Juste ! La traduction correcte de '{fr}' est '{ca}'.")
-        else:
-            reponse_correcte = False
-            st.error(f"Faux ! La traduction correcte de '{fr}' est '{ca}', mais vous avez répondu '{reponses_possibles[3]}'.")
-            st.session_state.fautes.append((fr, ca, reponses_possibles[3]))
-
-    if st.button("Suivant"):
-        st.session_state.index += 1
-
-    # Vérification de la fin du test
-    if st.session_state.index >= len(mots_possibles):
-        # Calcul de la note finale
-        note = (st.session_state.bonnes_reponses / len(mots)) * 100
-        st.subheader(f"\nVotre note : {note:.2f}%")
-
-        # Affichage des fautes
-        if st.session_state.fautes:
-            st.subheader("Fautes :")
-            for (fr, ca, reponse) in st.session_state.fautes:
-                st.error(f"Mot/phrase: '{fr}'\nAttendu: '{ca}'\nVotre réponse: '{reponse}'")
-        else:
-            st.success("Aucune faute ! Félicitations !")
+            print("Merci d'avoir joué !")
+    else:
+        print("Bravo, vous avez répondu correctement à tous les mots !")
 
 
 if __name__ == "__main__":
-    handle_placeholder_click()
+    main()
